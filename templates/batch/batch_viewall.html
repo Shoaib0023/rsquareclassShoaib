@@ -1,0 +1,285 @@
+{% extends 'layout.html' %}
+{% load static %}
+{% block title %}
+Dashboard | Batches
+{% endblock %}
+
+{% block top-includes %}
+<link href="{% static 'assets/plugins/datatables/dataTables.bootstrap4.min.css' %}" rel="stylesheet" type="text/css" />
+<link href="{% static 'assets/plugins/datatables/buttons.bootstrap4.min.css' %}" rel="stylesheet" type="text/css" />
+<link href="{% static 'assets/plugins/datatables/responsive.bootstrap4.min.css' %}" rel="stylesheet" type="text/css" />
+<link href="{% static 'assets/plugins/select2/css/select2.min.css' %}" rel="stylesheet" type="text/css" />
+<link href="{% static 'assets/plugins/bootstrap-touchspin/css/jquery.bootstrap-touchspin.min.css' %}" rel="stylesheet" />
+<link href="{% static 'assets/plugins/sweet-alert2/sweetalert2.min.css' %}" rel="stylesheet" type="text/css">
+{% endblock %}
+
+{% block content %}
+
+<!-- Start content -->
+<div class="content">
+    <div class="container-fluid m-t-15">
+
+      <!-- Header -->
+      <div class="row m-t-15">
+        <div class="col-md-6">
+          <h4 class="m-t-20">Batches(Goregaon)</h4>
+        </div>
+        <div class="col-md-6 m-t-20">
+          <button class="btn btn-sm btn-success float-right" data-toggle="modal" data-target="#addBatchModal"><i class="fa fa-plus mr-2" aria-hidden="true"></i>New Batch</button>
+        </div>
+      </div>
+
+      <!-- Modal -->
+      <div class="modal fade" id="addBatchModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="exampleModalLabel">Add batch</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+          <div class="modal-body">
+            <form method="POST" id="add-batch-form">
+              {% csrf_token %}
+              <div class="form-group">
+                <label for="batch-name" class="col-form-label">Batch Name:</label>
+                <input type="text" class="form-control" id="batch-name">
+              </div>
+              <p class="batch-name-error text-danger d-none mt-2">* Please Enter valid Batch Name</p>
+
+              <div class="row">
+                <div class="col-6">
+                  <div class="form-group">
+                    <label for="icOptions" class="col-form-label">Subjects:</label>
+                    <div class="subjects" style="overflow-y: scroll; height: 150px;">
+                      <hr>
+                      <a href="#" class="subs" data-value="Physics"><p class="m-0">Physics</p></a><hr>
+                      <a href="#" class="subs" data-value="Accounts"><p class="m-0">Accounts</p></a><hr>
+                      <a href="#" class="subs" data-value="Economics"><p class="m-0">Economics</p></a><hr>
+                      <a href="#" class="subs" data-value="Banking"><p class="m-0" >Banking</p></a><hr>
+                      <a href="#" class="subs" data-value="Maths"><p class="m-0">Maths</p></a><hr>
+                      <a href="#" class="subs" data-value="Chemistry"><p class="m-0">Chemistry</p></a><hr>
+                      <a href="#" class="subs" data-value="Biology"><p class="m-0">Biology</p></a><hr>
+                    </div>
+                    <p class="subject-error text-danger d-none mt-2">* Subject Already Selected</p>
+                  </div>
+                </div>
+                <div class="col-6">
+                  <label for="nothing" class="col-form-label">Selected Subjects:</label>
+                  <div class="selected-subjects" style="overflow-y: scroll; height: 150px;">
+                    <hr>
+                  </div>
+                  <p class="subject-empty-error text-danger d-none mt-2">* No subjects selected</p>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="academic-year" class="col-form-label">Academic Year:</label>
+                <input type="text" class="form-control" id="academic-year">
+              </div>
+              <p class="academic-year-error text-danger d-none mt-2">* Please Enter valid academic year</p>
+
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            <button type="submit" class="btn btn-primary add-batch-btn">Add Batch</button>
+          </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Search Bar -->
+      <div class="row m-t-15 mb-5">
+        <input type="text" class="form-control" placeholder="Enter Batch name to filter ...">
+      </div>
+
+      <h6 class="mb-0">Select: <a href="#" class="check-all text-success">All</a> | <a href="#" class="check-none text-success">None</a> <span class="ml-3"><p class="badge badge-secondary">11 students</p></span></h6>
+      <hr class="mt-0">
+
+      <!-- Batches -->
+      {% for batch in batches %}
+        <div class="row m-t-20">
+          <div class="col-md-1">
+            <input type="checkbox" class="check-batch mt-2" value=''>
+          </div>
+          <div class="col-md-2">
+            <p class="badge badge-secondary mt-2">{{batch.academic_year}}</p>
+          </div>
+          <div class="col-md-6">
+            <h5 class="font-22 text-success mt-0">{{batch.batch_name}}</h5>
+            <p><i class="fa fa-book mr-1" aria-hidden="true"></i>IX ICSE
+            <span class="ml-3"><i class="fa fa-users mr-1" aria-hidden="true"></i>4 students</span></p>
+          </div>
+          <div class="col-2">
+            <div class='batch-option-menu-{{batch.pk}} d-none' style="width:60%; position:absolute; border: 1px solid gray; background-color:rgba(240,240,240); padding: 8px;">
+              <p><a href="#"><i class="fa fa-archive mr-2" aria-hidden="true"></i>Edit</a></p>
+              <p><a href="#"><i class="fa fa-archive mr-2" aria-hidden="true"></i>Archieve</a></p>
+              <a href="#" class="text-danger"><i class="fa fa-trash mr-2" aria-hidden="true"></i>Delete</a>
+            </div>
+            <i id=`batch-ellipsis-${batch.pk}` onclick=toggleMenu({{batch.pk}}) class="fa fa-ellipsis-v float-right mt-3" aria-hidden="true"></i>
+          </div>
+        </div>
+        <hr class="mt-2">
+      {% endfor %}
+
+    </div>
+</div>
+<!-- content -->
+
+
+{% endblock %}
+
+{% block bottom-includes %}
+
+{% endblock %}
+
+{% block script %}
+<script>
+  $('.subject-error').addClass('d-none');
+  $('.batch-name-error').addClass('d-none');
+  $('.academic-year-error').addClass('d-none');
+  $('.subject-empty-error').addClass('d-none');
+
+  function toggleMenu(id){
+    var classVal = '.batch-option-menu-' + id ;
+    $(classVal).toggleClass('d-none');
+  }
+
+  $('.check-all').on('click', function(){
+    document.querySelectorAll('.check-batch').forEach(function(element){
+      element.checked = true;
+    })
+  })
+
+  $('.check-none').on('click', function(){
+    document.querySelectorAll('.check-batch').forEach(function(element){
+      element.checked = false;
+    })
+  })
+
+  var subjects = [];
+
+  $('.subs').on('click', function(){
+    $('.subject-error').addClass('d-none');
+    var subjectName = $(this).attr('data-value');
+    if(subjects.includes(subjectName)){
+      $('.subject-error').removeClass('d-none');
+    }
+    else{
+      subjects.push(subjectName);
+      var str = `<p class="mb-0 ${subjectName}">${subjectName}<a href="#" onclick='deleteSub("${subjectName}")' class="text-danger float-right" data-delvalue="${subjectName}">Del</a><p><hr id="${subjectName}hr">`;
+      $('.selected-subjects').append(str) ;
+    }
+  })
+
+
+  function deleteSub(subject){
+    // console.log('clicked ' + subject);
+    for( let i=0; i<subjects.length; i++){
+      if (subjects[i] === subject){
+        subjects.splice(i,1);
+        var subClass = '.selected-subjects ' + 'p.' + subject
+        var subHrId = '#' + subject + 'hr';
+        $(subClass).remove();
+        $(subHrId).remove();
+      }
+    }
+  }
+
+  $('.add-batch-btn').on('click', function(e){
+    e.preventDefault();
+    var batch = $('#batch-name').val();
+    var academicYear = $('#academic-year').val();
+
+    // error check for batch
+    if(batch.length === 0){
+      $('.batch-name-error').removeClass('d-none');
+      return
+    }
+    $('.batch-name-error').addClass('d-none');
+
+    // error check for subjects selected
+    if(subjects.length === 0){
+      $('.subject-empty-error').removeClass('d-none');
+      return
+    }
+    $('.subject-empty-error').addClass('d-none')
+
+    // error check for academic year selected
+    if(academicYear.length === 0){
+      $('.academic-year-error').removeClass('d-none');
+      return
+    }
+    $('.academic-year-error').addClass('d-none');
+
+
+    data = {
+        'batchName': batch ,
+        'academicYear':academicYear
+    }
+    console.log(data);
+
+
+    //Main ajax calls
+    function getCookie(name) {
+        var cookieValue = null;
+        if (document.cookie && document.cookie != '') {
+        var cookies = document.cookie.split(';');
+        for (var i = 0; i < cookies.length; i++) {
+            var cookie = jQuery.trim(cookies[i]);
+            // Does this cookie string begin with the name we want?
+            if (cookie.substring(0, name.length + 1) == (name + '=')) {
+            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+            break;
+            }
+        }
+        }
+        return cookieValue;
+    }
+      var csrftoken = getCookie('csrftoken');
+      function csrfSafeMethod(method) {
+          // these HTTP methods do not require CSRF protection
+          return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+      }
+      function sameOrigin(url) {
+          // test that a given url is a same-origin URL
+          // url could be relative or scheme relative or absolute
+          var host = document.location.host; // host + port
+          var protocol = document.location.protocol;
+          var sr_origin = '//' + host;
+          var origin = protocol + sr_origin;
+          // Allow absolute or scheme relative URLs to same origin
+          return (url == origin || url.slice(0, origin.length + 1) == origin + '/') ||
+          (url == sr_origin || url.slice(0, sr_origin.length + 1) == sr_origin + '/') ||
+          // or any other URL that isn't scheme relative or absolute i.e relative.
+          !(/^(\/\/|http:|https:).*/.test(url));
+      }
+
+      $.ajaxSetup({
+                  beforeSend: function (xhr, settings) {
+                      if (!csrfSafeMethod(settings.type) && sameOrigin(settings.url)) {
+                      // Send the token to same-origin, relative URLs only.
+                      // Send the token only if the method warrants CSRF protection
+                      // Using the CSRFToken value acquired earlier
+                      xhr.setRequestHeader("X-CSRFToken", csrftoken);
+                      }
+                  }
+            });
+
+    $.ajax({
+    url: `{% url 'batch-create' %}`,
+    type: 'POST',
+    dataType: "json",
+    data: data,
+    success: function (data) {
+        alert('Batch created successfully....')
+        window.location.reload();
+    }
+   })
+ })
+
+
+</script>
+{% endblock %}
